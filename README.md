@@ -31,3 +31,4 @@ Our team, Spellbinders ✨, combined skills in coding, engineering, research, an
 
 For more details about our project, reach out to our team via ERIC – KDU official channels.
 
+© 2025 Spellbinders. All rights reserved. 🏆
