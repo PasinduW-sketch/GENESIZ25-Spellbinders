@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Car Dodge</title>
+<style>
+body { margin:0; font-family:sans-serif; text-align:center; background:#222; color:#fff; }
+canvas { background:#333; display:block; margin:20px auto; border-radius:10px; }
+button { margin:5px; padding:8px 14px; font-weight:600; border-radius:8px; }
+.hud { font-weight:bold; margin-bottom:10px; }
+.overlay {
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,0.7); color:#fff; font-size:2em; font-weight:bold;
+  visibility:hidden;
+}
+</style>
+</head>
+<body>
+
+<h1>🚗 Car Dodge - Final Version</h1>
+<div class="hud">
+Score: <span id="score">0</span> | High: <span id="highscore">0</span> | 
+Speed: <span id="speed">1.0x</span> | Lives: <span id="lives">❤️❤️❤️</span>
+</div>
+<div style="position:relative; display:inline-block;">
+  <canvas id="game" width="400" height="600" tabindex="0"></canvas>
+  <div id="overlay" class="overlay"></div>
+</div>
+<br>
+<button onclick="startGame()">Start</button>
+<button onclick="resetGame()">Restart</button>
+<p>Use ◀ ▶ arrow keys to move your car</p>
+
+<!-- 🔊 Sound files (replace with your own if needed) -->
+<audio id="crashSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+<audio id="scoreSound" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg"></audio>
+<audio id="bgMusic" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const overlay = document.getElementById('overlay');
+
+let score=0, highscore=localStorage.getItem("highscore")||0;
+let running=false, obstacles=[], lines=[], gameInterval, startTime;
+let lives = 3;
+
+document.getElementById('highscore').textContent=highscore;
+
+const crashSound = document.getElementById("crashSound");
+const scoreSound = document.getElementById("scoreSound");
+const bgMusic = document.getElementById("bgMusic");
+
+const player = { x:170, y:500, w:60, h:120, speed:8, left:false, right:false };
+const lanes = [50,150,250,350];
+
+// ROAD LINES
+for(let i=0;i<10;i++){ lines.push({x:195, y:i*60, w:10, h:40}); }
+
+function drawRoadLines(){
+    ctx.fillStyle="#fff";
+    lines.forEach(l=>{ ctx.fillRect(l.x,l.y,l.w,l.h); });
+}
+function updateRoadLines(){
+    lines.forEach(l=>{
+        l.y+=6;
+        if(l.y>canvas.height) l.y=-40;
+    });
+}
+
+function spawnObstacle(){
+    const laneX = lanes[Math.floor(Math.random()*lanes.length)]-30;
+    const elapsed = ((Date.now()-startTime)/1000);
+    const speedMultiplier = 1 + Math.floor(elapsed/10)*0.3 + Math.floor(score/10)*0.2;
+    obstacles.push({x:laneX, y:-120, w:60, h:120, speed:3*speedMultiplier});
+    document.getElementById('speed').textContent=speedMultiplier.toFixed(1)+'x';
+}
+
+function drawPlayer(){
+    ctx.fillStyle="#00ff00";
+    ctx.fillRect(player.x, player.y, player.w, player.h);
+    ctx.fillStyle="#88ff88";
+    ctx.fillRect(player.x+10, player.y+20, 40, 40);
+}
+
+function drawObstacles(){
+    obstacles.forEach(o=>{
+        ctx.fillStyle="#"+Math.floor(Math.random()*16777215).toString(16); // random color
+        ctx.fillRect(o.x, o.y, o.w, o.h);
+        ctx.fillStyle="#fff";
+        ctx.fillRect(o.x+10, o.y+20, 40, 40);
+    });
+}
+
+function updateObstacles(){
+    for(let i=obstacles.length-1;i>=0;i--){
+        let o=obstacles[i];
+        o.y += o.speed;
+        if(o.y>canvas.height){
+            obstacles.splice(i,1);
+            score++;
+            scoreSound.currentTime=0; scoreSound.play();
+            document.getElementById('score').textContent=score;
+        } else if(o.x < player.x+player.w && o.x+o.w>player.x && o.y<player.y+player.h && o.y+o.h>player.y){
+            obstacles.splice(i,1);
+            handleCollision();
+        }
+    }
+}
+
+function clearCanvas(){ ctx.clearRect(0,0,canvas.width,canvas.height); }
+
+function frame(){
+    if(!running) return;
+    if(player.left) player.x -= player.speed;
+    if(player.right) player.x += player.speed;
+    if(player.x<0) player.x=0;
+    if(player.x+player.w>canvas.width) player.x=canvas.width-player.w;
+
+    clearCanvas();
+    drawRoadLines();
+    updateRoadLines();
+    drawPlayer();
+    drawObstacles();
+    updateObstacles();
+    requestAnimationFrame(frame);
+}
+
+function updateLives(){
+    document.getElementById('lives').textContent = "❤️".repeat(lives);
+}
+
+function startGame(){
+    if(running) return;
+    score=0; obstacles=[]; lives=3; running=true;
+    overlay.style.visibility="hidden";
+    document.getElementById('score').textContent=score;
+    updateLives();
+    startTime = Date.now();
+    bgMusic.play();
+    gameInterval=setInterval(()=>{ if(running) spawnObstacle(); }, 1000);
+    frame();
+}
+
+function handleCollision(){
+    crashSound.currentTime=0; crashSound.play();
+    lives--;
+    updateLives();
+    if(lives <= 0){
+        endGame();
+    } else {
+        obstacles=[];
+        player.x = 170; // reset position
+    }
+}
+
+function endGame(){
+    running=false; clearInterval(gameInterval);
+    bgMusic.pause(); bgMusic.currentTime=0;
+    overlay.textContent="Game Over! Score: "+score;
+    overlay.style.visibility="visible";
+    if(score>highscore){ 
+        highscore=score;
+        localStorage.setItem("highscore",highscore);
+        document.getElementById('highscore').textContent=highscore;
+    }
+}
+
+function resetGame(){
+    running=false; obstacles=[]; score=0; lives=3;
+    document.getElementById('score').textContent=score;
+    document.getElementById('speed').textContent='1.0x';
+    updateLives();
+    overlay.style.visibility="hidden";
+    clearCanvas(); drawPlayer();
+}
+
+// Key events
+window.addEventListener('keydown', e=>{ if(e.key==='ArrowLeft') player.left=true; if(e.key==='ArrowRight') player.right=true; });
+window.addEventListener('keyup', e=>{ if(e.key==='ArrowLeft') player.left=false; if(e.key==='ArrowRight') player.right=false; });
+
+</script>
+</body>
+</html>
