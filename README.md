@@ -65,9 +65,8 @@ A hands-on challenge focusing on aeronautical engineering:
 ## 📬 Contact & License
 For further information, reach out to our team via the official **ERIC – KDU** channels.
 
-**© 2025 Spellbinders.** This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details. 🏆
+** This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details. 🏆
 
----
 **Developed with ✨ by Team Spellbinders**
 *Engineering the future through innovation and teamwork at GENESIZ '25.*
 
