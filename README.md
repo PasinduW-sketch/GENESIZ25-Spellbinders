@@ -46,7 +46,7 @@ A hands-on challenge focusing on aeronautical engineering:
 ---
 
 ## 🤝 Team Spellbinders
-* **Pasindu Harsha** — Captain
+* **Pasindu Harsha** — Leader
 * **Niven Basnayaka**
 * **Mihan Balachandra**
 * **Yasindu Rashmika**
