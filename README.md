@@ -15,7 +15,7 @@ Our team combined skills in coding, engineering, research, and strategy to compe
 ---
 
 ## 🌟 Highlights & Achievements
-* **Top 12 Finalists 🥇:** Recognized as one of the elite innovation teams in the national competition.
+* **Top 12 Finalists 🥇:** Recognized as one of the elite innovation teams in the national competition. (7 out of 12)
 * **Multidisciplinary:** Applied advanced concepts of physics, mathematics, biology, and engineering.
 * **Practical Innovation:** Developed a high-performance glider through iterative prototyping.
 * **Real-World Impact:** Hands-on learning focused on solving practical engineering problems 🌍.
